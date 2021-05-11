@@ -474,7 +474,7 @@ uint32_t rol_32(uint32_t a, uint32_t n) {
  * Store unaligned 32-bit integer (little-endian encoding)
  */
 static inline __attribute__((always_inline)) 
-uint32_t store_32_le(uint32_t a, const uint8_t *p) {
+void store_32_le(uint32_t a, const uint8_t *p) {
    ((uint8_t *)(p))[0] = ((uint32_t)(a) >> 0) & 0xFFU;
    ((uint8_t *)(p))[1] = ((uint32_t)(a) >> 8) & 0xFFU;
    ((uint8_t *)(p))[2] = ((uint32_t)(a) >> 16) & 0xFFU;

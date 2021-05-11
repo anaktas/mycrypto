@@ -39,6 +39,6 @@ uint32_t load_32_le(const uint8_t *key);
 static inline __attribute__((always_inline)) 
 uint32_t rol_32(uint32_t a, uint32_t n);
 static inline __attribute__((always_inline)) 
-uint32_t store_32_le(uint32_t a, const uint8_t *p);
+void store_32_le(uint32_t a, const uint8_t *p);
 
 #endif
