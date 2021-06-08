@@ -1,0 +1,3 @@
+This is a test plaintext message, which we will use in order to check
+the capability of our encryption implementation. We will try to put
+some characters here, just to explore the length capability.
