@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "utils.h"
 
 /**
@@ -79,4 +80,43 @@ long int get_file_size(char *file_path) {
     fclose(file);
 
     return file_size;
+}
+
+int parse_arguments(Arguments *args, int argc, char *argv[]) {
+    if (argc < 7) {
+        printf("Not enough arguments.\n");
+        printf("Usage: aes [-e|-d] <INPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]\n");
+        return 1;
+    }
+
+    args->encryption_flag = 0;
+    args->input_file_path = "";
+    args->key_file_path = "";
+    args->key_length = 16;
+
+    for (int i = 1; i < argc; i++) {
+        if ((i + 1) == argc) break;
+
+        if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "-e")) {
+            if (!strcmp(argv[i], "-d")) {
+                args->encryption_flag = 0;
+            } else {
+                args->encryption_flag = 1;
+            }
+            
+            args->input_file_path = argv[i + 1];
+        }
+
+        if (!strcmp(argv[i], "-k")) {
+            args->key_file_path = argv[i + 1];
+        }
+
+        if (!strcmp(argv[i], "-l")) {
+            if (!strcmp(argv[i + 1], "128")) args->key_length = 16;
+            if (!strcmp(argv[i + 1], "192")) args->key_length = 24;
+            if (!strcmp(argv[i + 1], "256")) args->key_length = 32;
+        }
+    }
+
+    return 0;    
 }
