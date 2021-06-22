@@ -1,61 +1,100 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include "utils.h"
 #include "aes.h"
 
+void main_entry(Arguments *arguments);
+
 int main(int argc, char *argv[]) {
-    char *output;
+    Arguments arguments;
 
-    if (argc == 2) {
-        char *file_path = argv[1];
-        long int file_size = 0;
+    int parsing_error = parse_arguments(&arguments, argc, argv);
 
-        file_size = get_file_size(file_path);
-        if (file_size == 0){
-            file_size = 16;
-        }
-
-        int chunk_count = file_size / 16;
-        int chunk_remnant = file_size % 16;
-        printf("Output variable chunk count: %d\n", chunk_count);
-        printf("Output variable chunk remnant: %d\n", chunk_remnant);
-
-        output = (char*) malloc(sizeof(char) * file_size);
-        
-        int result = read_file(file_path, output, file_size);
-        printf("The output is:\n%s\n", output);
-
-        char *chunk = (char*) malloc(sizeof(char) * 16);
-
-        // size_t output_len = strlen(output);
-        // size_t chunk_len = sizeof(chunk);
-
-        for (int i = 0; i < chunk_count; i++) {
-            memcpy(chunk, output + (i * sizeof(char) * 16), (sizeof(char) * 16));
-            printf("Chunk %d:           %s\n", i, chunk);
-
-            Aes aes;
-            init(&aes, "123456", 32);
-            char *cipher_out = (char*) malloc(sizeof(char) * 16);
-            encrypt(&aes, chunk, cipher_out);
-            printf("Encrypted chunk %d: %s\n", i, cipher_out);
-            char *decipher_out = (char*) malloc(sizeof(char) * 16);
-            decrypt(&aes, cipher_out, decipher_out);
-            printf("Decrypted chunk %d: %s\n", i, decipher_out);
-            printf("\n");
-
-            free(cipher_out);
-            free(decipher_out);
-        }
-
-        free(chunk);
-
-        write_file(output, "output");
+    if (parsing_error != 0) {
+        printf("Error while parsing arguments.\n");
+        return 1;
     }
 
-    free(output);
+    main_entry(&arguments);
 
     return 0;
+}
+
+void main_entry(Arguments *arguments) {
+    uint8_t *input;
+    uint8_t *output;
+    uint8_t *key;
+
+    long int input_file_size = 0;
+    long int key_file_size = 0;
+
+    input_file_size = get_file_size(arguments->input_file_path);
+    if (input_file_size == 0){
+        input_file_size = 16;
+    }
+
+    key_file_size = get_file_size(arguments->key_file_path);
+    if (key_file_size == 0){
+        key_file_size = 16;
+    }
+
+    int chunk_count = input_file_size / 16;
+    int chunk_remnant = input_file_size % 16;
+    printf("Input file size:              %ld\n", input_file_size);
+    printf("Input variable chunk count:   %d\n", chunk_count);
+    printf("Input variable chunk remnant: %d\n", chunk_remnant);
+
+    input = (uint8_t*) malloc(sizeof(uint8_t) * input_file_size);
+    output = (uint8_t*) malloc(sizeof(uint8_t) * input_file_size);
+    key = (uint8_t*) malloc(sizeof(uint8_t) * key_file_size);
+        
+    int result = read_file(arguments->input_file_path, input, input_file_size);
+    printf("The output is:\n%s\n", input);
+    result = read_file(arguments->key_file_path, key, key_file_size);
+    printf("The key is: %s\n", key);
+
+    uint8_t *chunk = (uint8_t*) malloc(sizeof(uint8_t) * 16);
+
+    // size_t output_len = strlen(output);
+    // size_t chunk_len = sizeof(chunk);
+
+    strcpy(output, "");
+
+    for (int i = 0; i < chunk_count; i++) {
+        memcpy(chunk, input + (i * sizeof(uint8_t) * 16), (sizeof(uint8_t) * 16));
+        printf("Chunk %d:           %s\n", i, chunk);
+
+        Aes aes;
+        init(&aes, key, arguments->key_length);
+
+        if (arguments->encryption_flag == 1) {
+            uint8_t *cipher_out = (uint8_t*) malloc(sizeof(uint8_t) * 16);
+            encrypt(&aes, chunk, cipher_out);
+            printf("Encrypted chunk %d: %s\n", i, cipher_out);
+            strcat(output, cipher_out);
+            free(cipher_out);
+        } else {
+            uint8_t *decipher_out = (uint8_t*) malloc(sizeof(uint8_t) * 16);
+            decrypt(&aes, chunk, decipher_out);
+            printf("Decrypted chunk %d: %s\n", i, decipher_out);
+            strcat(output, decipher_out);
+            free(decipher_out);
+        }
+        
+        printf("\n");
+    }
+
+    free(chunk);
+
+    if (arguments->encryption_flag == 1) {
+        write_file(output, "encrypted");
+    } else {
+        write_file(output, "decrypted");
+    }
+
+    free(input);
+    free(output);
 }
