@@ -63,6 +63,9 @@ void main_entry(Arguments *arguments) {
 
     strcpy(output, "");
 
+    // TODO: We have to take into account the remnant in order
+    // to make a proper encrypted file. Otherwise the decrypted
+    // file will be a mess. -TD
     for (int i = 0; i < chunk_count; i++) {
         memcpy(chunk, input + (i * sizeof(uint8_t) * 16), (sizeof(uint8_t) * 16));
         printf("Chunk %d:           %s\n", i, chunk);
