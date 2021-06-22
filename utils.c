@@ -82,6 +82,14 @@ long int get_file_size(char *file_path) {
     return file_size;
 }
 
+/**
+ * This function is parsing the console arguments into
+ * a local arguments structure.
+ * 
+ * @param args an Arguments struct pointer
+ * @param argc the arguments counter
+ * @param argv the arguments vector
+ */
 int parse_arguments(Arguments *args, int argc, char *argv[]) {
     if (argc < 7) {
         printf("Not enough arguments.\n");
