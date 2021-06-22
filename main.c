@@ -56,8 +56,6 @@ void main_entry(Arguments *arguments) {
     result = read_file(arguments->key_file_path, key, key_file_size);
     printf("The key is: %s\n", key);
 
-    uint8_t *chunk = (uint8_t*) malloc(sizeof(uint8_t) * 16);
-
     // size_t output_len = strlen(output);
     // size_t chunk_len = sizeof(chunk);
 
@@ -67,6 +65,8 @@ void main_entry(Arguments *arguments) {
     // to make a proper encrypted file. Otherwise the decrypted
     // file will be a mess. -TD
     for (int i = 0; i < chunk_count; i++) {
+        uint8_t *chunk = (uint8_t*) malloc(sizeof(uint8_t) * 16);
+
         memcpy(chunk, input + (i * sizeof(uint8_t) * 16), (sizeof(uint8_t) * 16));
         printf("Chunk %d:           %s\n", i, chunk);
 
@@ -88,9 +88,9 @@ void main_entry(Arguments *arguments) {
         }
         
         printf("\n");
-    }
 
-    free(chunk);
+        free(chunk);
+    }
 
     if (arguments->encryption_flag == 1) {
         write_file(output, "encrypted");
