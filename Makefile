@@ -1,11 +1,7 @@
 compile:
-	gcc -c aes.c
-	gcc aes.h
-	gcc -c utils.c
-	gcc utils.h
+	gcc utils.h utils.c aes.h aes.c main.c -o aes
 
 clean:
-	-rm aes.o
-	-rm aes.h.gch
-	-rm utils.o
-	-rm utils.h.gch
+	-rm aes
+	-rm encrypted
+	-rm decrypted
