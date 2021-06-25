@@ -40,10 +40,6 @@ int read_file(char *file_path, char *output, long int output_size) {
 int write_file(char *output, char *file_path) {
     FILE *file;
     int result = 0;
-    
-    if (file_path == NULL) {
-        file_path = "cipheroutput";
-    }
 
     file = fopen(file_path, "w+");
 
@@ -75,7 +71,6 @@ long int get_file_size(char *file_path) {
     fseek(file, 0, SEEK_END);
     file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
-    printf("fteel size: %ld\n", file_size);
 
     fclose(file);
 
