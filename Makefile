@@ -10,3 +10,7 @@ clean:
 	-rm encrypted
 	-rm decrypted
 	-rm core
+
+reset:
+	-rm encrypted
+	-rm decrypted
