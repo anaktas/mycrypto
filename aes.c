@@ -183,7 +183,7 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
   
    // Copy the original key
    for(i = 0; i < key_length; i++) {
-      aes->encryption_scheduled_key[i] = load_32_le(key + (i * 4));
+      aes->encryption_scheduled_key[i] = LOAD32LE(key + (i * 4));
    }
   
    // The size of the key schedule depends on the number of rounds
@@ -256,10 +256,10 @@ void encrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    uint32_t temp;
   
    // Copy the plaintext to the state array
-   s0 = load_32_le(input + 0);
-   s1 = load_32_le(input + 4);
-   s2 = load_32_le(input + 8);
-   s3 = load_32_le(input + 12);
+   s0 = LOAD32LE(input + 0);
+   s1 = LOAD32LE(input + 4);
+   s2 = LOAD32LE(input + 8);
+   s3 = LOAD32LE(input + 12);
   
    // Initial round key addition
    s0 ^= aes->encryption_scheduled_key[0];
@@ -337,10 +337,10 @@ void encrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    s3 = t3 ^ aes->encryption_scheduled_key[aes->number_of_rounds * 4 + 3];
   
    // The final state is then copied to the output
-   store_32_le(s0, output + 0);
-   store_32_le(s1, output + 4);
-   store_32_le(s2, output + 8);
-   store_32_le(s3, output + 12);
+   STORE32LE(s0, output + 0);
+   STORE32LE(s1, output + 4);
+   STORE32LE(s2, output + 8);
+   STORE32LE(s3, output + 12);
 }
 
 /**
@@ -364,10 +364,10 @@ void decrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    uint32_t temp;
   
    // Copy the ciphertext to the state array
-   s0 = load_32_le(input + 0);
-   s1 = load_32_le(input + 4);
-   s2 = load_32_le(input + 8);
-   s3 = load_32_le(input + 12);
+   s0 = LOAD32LE(input + 0);
+   s1 = LOAD32LE(input + 4);
+   s2 = LOAD32LE(input + 8);
+   s3 = LOAD32LE(input + 12);
   
    // Initial round key addition
    s0 ^= aes->decryption_scheduled_key[aes->number_of_rounds * 4];
@@ -445,10 +445,10 @@ void decrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    s3 = t3 ^ aes->decryption_scheduled_key[3];
   
    // The final state is then copied to the output
-   store_32_le(s0, output + 0);
-   store_32_le(s1, output + 4);
-   store_32_le(s2, output + 8);
-   store_32_le(s3, output + 12);
+   STORE32LE(s0, output + 0);
+   STORE32LE(s1, output + 4);
+   STORE32LE(s2, output + 8);
+   STORE32LE(s3, output + 12);
 }
 
 /**
