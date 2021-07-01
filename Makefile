@@ -14,3 +14,4 @@ clean:
 reset:
 	-rm encrypted
 	-rm decrypted
+	clear
