@@ -12,12 +12,17 @@
  * @param output the output char pointer
  * @param output_size the size of the given output array
  */
-int read_file(char *file_path, char *output, long int output_size) {
+int
+read_file(char *file_path,
+          char *output,
+          long int output_size)
+{
     FILE *file;
 
     file = fopen(file_path, "r");
 
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Error while opening the file in read_file()\n");
         return 1;
     }
@@ -37,13 +42,16 @@ int read_file(char *file_path, char *output, long int output_size) {
  * @param output the given output to store to a file
  * @param file_path the file path to store the file
  */
-int write_file(char *output, char *file_path) {
+int
+write_file(char *output, char *file_path)
+{
     FILE *file;
     int result = 0;
 
     file = fopen(file_path, "w+");
 
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Error while opening the file in write_file()\n");
         return 1;
     }
@@ -58,13 +66,16 @@ int write_file(char *output, char *file_path) {
  * 
  * @param file_path the file path
  */
-long int get_file_size(char *file_path) {
+long int
+get_file_size(char *file_path)
+{
     FILE *file;
     long int file_size = 0;
 
     file = fopen(file_path, "r");
 
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Error while opening the file in get_file_size()\n");
     }
 
@@ -85,8 +96,13 @@ long int get_file_size(char *file_path) {
  * @param argc the arguments counter
  * @param argv the arguments vector
  */
-int parse_arguments(Arguments *args, int argc, char *argv[]) {
-    if (argc < 7) {
+int
+parse_arguments(Arguments *args,
+                int argc,
+                char *argv[])
+{
+    if (argc < 7)
+    {
         printf("Not enough arguments.\n");
         printf("Usage: aes [-e|-d] <INPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]\n");
         return 1;
@@ -97,24 +113,31 @@ int parse_arguments(Arguments *args, int argc, char *argv[]) {
     args->key_file_path = "";
     args->key_length = 16;
 
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++)
+    {
         if ((i + 1) == argc) break;
 
-        if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "-e")) {
-            if (!strcmp(argv[i], "-d")) {
+        if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "-e"))
+        {
+            if (!strcmp(argv[i], "-d"))
+            {
                 args->encryption_flag = 0;
-            } else {
+            }
+            else
+            {
                 args->encryption_flag = 1;
             }
             
             args->input_file_path = argv[i + 1];
         }
 
-        if (!strcmp(argv[i], "-k")) {
+        if (!strcmp(argv[i], "-k"))
+        {
             args->key_file_path = argv[i + 1];
         }
 
-        if (!strcmp(argv[i], "-l")) {
+        if (!strcmp(argv[i], "-l"))
+        {
             if (!strcmp(argv[i + 1], "128")) args->key_length = 16;
             if (!strcmp(argv[i + 1], "192")) args->key_length = 24;
             if (!strcmp(argv[i + 1], "256")) args->key_length = 32;

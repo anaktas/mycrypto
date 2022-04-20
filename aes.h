@@ -27,19 +27,22 @@
     ((uint32_t)(((uint8_t *)(p))[2]) << 16) | \
     ((uint32_t)(((uint8_t *)(p))[3]) << 24))
 
-typedef enum {
+typedef enum
+{
     NO_ERROR = 0,
     ERROR_INVALID_PARAMETER = 1,
     ERROR_INVALID_KEY_LENGTH = 2
 } Aes_Error;
 
-typedef enum {
+typedef enum
+{
     KEY_128 = 0,
     KEY_192 = 1,
     KEY_256 = 2
 } Aes_key_size;
 
-typedef struct {
+typedef struct
+{
     Aes_key_size key_size;
     uint8_t key;
     uint8_t number_of_rounds;
@@ -50,18 +53,25 @@ typedef struct {
 /**
  * AES functions for key expansion, encryption and decryption
  */
-Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length);
-void encrypt(Aes *aes, const uint8_t *input, uint8_t *output);
-void decrypt(Aes *aes, const uint8_t *input, uint8_t *output);
+Aes_Error
+init(Aes *aes, const uint8_t *key, size_t key_length);
+
+void
+encrypt(Aes *aes, const uint8_t *input, uint8_t *output);
+
+void
+decrypt(Aes *aes, const uint8_t *input, uint8_t *output);
 
 /**
  * Helpers
  */
-static inline __attribute__((always_inline)) 
-uint32_t load_32_le(const uint8_t *key);
-static inline __attribute__((always_inline)) 
-uint32_t rol_32(uint32_t a, uint32_t n);
-static inline __attribute__((always_inline)) 
-void store_32_le(uint32_t a, const uint8_t *p);
+static inline __attribute__((always_inline)) uint32_t
+load_32_le(const uint8_t *key);
+
+static inline __attribute__((always_inline)) uint32_t
+rol_32(uint32_t a, uint32_t n);
+
+static inline __attribute__((always_inline)) void
+store_32_le(uint32_t a, const uint8_t *p);
 
 #endif

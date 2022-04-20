@@ -152,7 +152,9 @@ static const uint32_t rcon[11] =
  * @param key the pointer of the given encryption key
  * @param key_length the key length
  */
-Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
+Aes_Error
+init(Aes *aes, const uint8_t *key, size_t key_length)
+{
    uint8_t i;
    uint32_t temp;
    size_t key_schedule_size;
@@ -161,19 +163,26 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
    if (aes == NULL || key == NULL) return ERROR_INVALID_PARAMETER;
   
    // Check the length of the key
-   if (key_length == 16) {
+   if (key_length == 16)
+   {
       // 10 rounds are required for 128-bit key
       aes->key_size = KEY_128;
       aes->number_of_rounds = 10;
-   } else if (key_length == 24) {
+   }
+   else if (key_length == 24)
+   {
       //1 2 rounds are required for 192-bit key
       aes->key_size = KEY_192;
       aes->number_of_rounds = 12;
-   } else if (key_length == 32) {
+   }
+   else if (key_length == 32)
+   {
       // 14 rounds are required for 256-bit key
       aes->key_size = KEY_256;
       aes->number_of_rounds = 14;
-   } else {
+   }
+   else
+   {
       // Report an error
       return ERROR_INVALID_KEY_LENGTH;
    }
@@ -182,7 +191,8 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
    key_length /= 4;
   
    // Copy the original key
-   for(i = 0; i < key_length; i++) {
+   for (i = 0; i < key_length; i++)
+   {
       aes->encryption_scheduled_key[i] = LOAD32LE(key + (i * 4));
    }
   
@@ -190,23 +200,29 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
    key_schedule_size = 4 * (aes->number_of_rounds + 1);
   
    // Generate the key schedule (encryption)
-   for(i = key_length; i < key_schedule_size; i++) {
+   for (i = key_length; i < key_schedule_size; i++)
+   {
       // Save previous word
       temp = aes->encryption_scheduled_key[i - 1];
   
       // Apply transformation
-      if ((i % key_length) == 0) {
+      if ((i % key_length) == 0)
+      {
          aes->encryption_scheduled_key[i] = sbox[(temp >> 8) & 0xFF];
          aes->encryption_scheduled_key[i] |= (sbox[(temp >> 16) & 0xFF] << 8);
          aes->encryption_scheduled_key[i] |= (sbox[(temp >> 24) & 0xFF] << 16);
          aes->encryption_scheduled_key[i] |= (sbox[temp & 0xFF] << 24);
          aes->encryption_scheduled_key[i] ^= rcon[i / key_length];
-      } else if(key_length > 6 && (i % key_length) == 4) {
+      }
+      else if (key_length > 6 && (i % key_length) == 4)
+      {
          aes->encryption_scheduled_key[i] = sbox[temp & 0xFF];
          aes->encryption_scheduled_key[i] |= (sbox[(temp >> 8) & 0xFF] << 8);
          aes->encryption_scheduled_key[i] |= (sbox[(temp >> 16) & 0xFF] << 16);
          aes->encryption_scheduled_key[i] |= (sbox[(temp >> 24) & 0xFF] << 24);
-      } else {
+      }
+      else
+      {
          aes->encryption_scheduled_key[i] = temp;
       }
   
@@ -215,12 +231,16 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
    }
   
    // Generate the key schedule (decryption)
-   for(i = 0; i < key_schedule_size; i++) {
+   for (i = 0; i < key_schedule_size; i++)
+   {
       // Apply the InvMixColumns transformation to all round keys
       // but the first and the last
-      if(i < 4 || i >= (key_schedule_size - 4)) {
+      if (i < 4 || i >= (key_schedule_size - 4))
+      {
          aes->decryption_scheduled_key[i] = aes->encryption_scheduled_key[i];
-      } else {
+      }
+      else
+      {
          aes->decryption_scheduled_key[i] = td[sbox[aes->encryption_scheduled_key[i] & 0xFF]];
          temp = td[sbox[(aes->encryption_scheduled_key[i] >> 8) & 0xFF]];
          aes->decryption_scheduled_key[i] ^= rol_32(temp, 8);
@@ -243,7 +263,9 @@ Aes_Error init(Aes *aes, const uint8_t *key, size_t key_length) {
  * @param input the given 128-bit block plaitext input pointer
  * @param output the cipher output pointer
  */
-void encrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
+void
+encrypt(Aes *aes, const uint8_t *input, uint8_t *output)
+{
    uint8_t i;
    uint32_t s0;
    uint32_t s1;
@@ -268,7 +290,8 @@ void encrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    s3 ^= aes->encryption_scheduled_key[3];
   
    // The number of rounds depends on the key length
-   for(i = 1; i < aes->number_of_rounds; i++) {
+   for (i = 1; i < aes->number_of_rounds; i++)
+   {
       // Apply round function
       t0 = te[s0 & 0xFF];
       temp = te[(s1 >> 8) & 0xFF];
@@ -351,7 +374,9 @@ void encrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
  * @param input the 128-bit cipher block input pointer
  * @param output the plaintext output pointer
  */
-void decrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
+void
+decrypt(Aes *aes, const uint8_t *input, uint8_t *output)
+{
    uint8_t i;
    uint32_t s0;
    uint32_t s1;
@@ -376,7 +401,8 @@ void decrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
    s3 ^= aes->decryption_scheduled_key[aes->number_of_rounds * 4 + 3];
   
    // The number of rounds depends on the key length
-   for(i = aes->number_of_rounds - 1; i >= 1; i--) {
+   for (i = aes->number_of_rounds - 1; i >= 1; i--)
+   {
       // Apply round function
       t0 = td[s0 & 0xFF];
       temp = td[(s3 >> 8) & 0xFF];
@@ -454,8 +480,9 @@ void decrypt(Aes *aes, const uint8_t *input, uint8_t *output) {
 /**
  * Load unaligned 32-bit integer (little-endian encoding)
  */
-static inline __attribute__((always_inline)) 
-uint32_t load_32_le(const uint8_t *key) {
+static inline __attribute__((always_inline)) uint32_t
+load_32_le(const uint8_t *key)
+{
    return ((uint32_t)(((uint8_t *)(key))[0]) << 0) |
             ((uint32_t)(((uint8_t *)(key))[1]) << 8) |
             ((uint32_t)(((uint8_t *)(key))[2]) << 16) |
@@ -465,16 +492,18 @@ uint32_t load_32_le(const uint8_t *key) {
 /**
  * Rotate left operation (32-bit)
  */
-static inline __attribute__((always_inline)) 
-uint32_t rol_32(uint32_t a, uint32_t n) {
+static inline __attribute__((always_inline)) uint32_t
+rol_32(uint32_t a, uint32_t n)
+{
    return ((a) << (n)) | ((a) >> (32 - (n)));
 }
 
 /**
  * Store unaligned 32-bit integer (little-endian encoding)
  */
-static inline __attribute__((always_inline)) 
-void store_32_le(uint32_t a, const uint8_t *p) {
+static inline __attribute__((always_inline)) void
+store_32_le(uint32_t a, const uint8_t *p)
+{
    ((uint8_t *)(p))[0] = ((uint32_t)(a) >> 0) & 0xFFU;
    ((uint8_t *)(p))[1] = ((uint32_t)(a) >> 8) & 0xFFU;
    ((uint8_t *)(p))[2] = ((uint32_t)(a) >> 16) & 0xFFU;
