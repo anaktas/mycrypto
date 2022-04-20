@@ -5,6 +5,7 @@
 #include <string.h>
 #include "utils.h"
 #include "aes.h"
+#include "log.h"
 
 void
 main_entry(Arguments *arguments);
@@ -22,7 +23,7 @@ main(int argc, char *argv[])
 
     if (parsing_error != 0)
     {
-        printf("Error while parsing arguments.\n");
+        err("Error while parsing arguments.");
         return 1;
     }
 
@@ -45,7 +46,7 @@ main_entry(Arguments *arguments)
 
     if (input_file_size == 0)
     {
-        printf("It seems that the input file is empty. Aborting operation.\n");
+        err("It seems that the input file is empty. Aborting operation.");
         return;
     }
 
@@ -53,16 +54,16 @@ main_entry(Arguments *arguments)
 
     if (key_file_size == 0)
     {
-        printf("It seems that the key file is empty. Aborting operation.\n");
+        err("It seems that the key file is empty. Aborting operation.");
         return;
     }
 
     int chunk_count = input_file_size / 16;
     int chunk_remnant = input_file_size % 16;
 
-    printf("Input file size:              %ld\n", input_file_size);
-    printf("Input variable chunk count:   %d\n", chunk_count);
-    printf("Input variable chunk remnant: %d\n", chunk_remnant);
+    dbg("Input file size:              %ld", input_file_size);
+    dbg("Input variable chunk count:   %d", chunk_count);
+    dbg("Input variable chunk remnant: %d", chunk_remnant);
 
     input = (char*) malloc(sizeof(char) * input_file_size);
     output = (char*) malloc(sizeof(char) * input_file_size);
@@ -94,22 +95,22 @@ main_entry(Arguments *arguments)
 
     if (arguments->encryption_flag == 1)
     {
-        printf("Starting encryption...\n");
+        inf("Starting encryption...");
     }
     else
     {
-        printf("Starting decryption...\n");
+        inf("Starting decryption...");
     }
 
     for (int i = 0; i < chunk_count; i++)
     {
-        printf(".");
+        inf(".");
         char chunk[16 + 1];
 
         memcpy(chunk, input + (i * sizeof(char) * 16), (sizeof(char) * 16));
         chunk[16] = '\0';
-        // printf("Chunk %d:           %s\n", i, chunk);
-        // printf("Strlen chunk:       %ld\n", strlen(chunk));
+        // dbg("Chunk %d:           %s", i, chunk);
+        // dbg("Strlen chunk:       %ld", strlen(chunk));
 
         if (arguments->encryption_flag == 1)
         {
@@ -122,21 +123,21 @@ main_entry(Arguments *arguments)
             // chunks will be encrypted in a string with less that the
             // expected length.
             encrypt(&aes, chunk, cipher_out);
-            // printf("Encrypted chunk %d: %s\n", i, cipher_out);
-            // printf("Strlen encrypted:   %ld\n", strlen(cipher_out));
+            // dbg("Encrypted chunk %d: %s", i, cipher_out);
+            // dbg("Strlen encrypted:   %ld", strlen(cipher_out));
 
             // for (int j = 0; j < 16; j++)
             // {
-            //     printf("Cipher out %d: %c\n", j, cipher_out[j]);
+            //     dbg("Cipher out %d: %c", j, cipher_out[j]);
             // }
 
             // decrypt(&aes, cipher_out, decipher_out);
-            // printf("Decrypted chunk %d: %s\n", i, decipher_out);
-            // printf("Strlen decrypted:   %ld\n", strlen(decipher_out));
+            // dbg("Decrypted chunk %d: %s", i, decipher_out);
+            // dbg("Strlen decrypted:   %ld", strlen(decipher_out));
 
             // for (int j = 0; j < 16; j++)
             // {
-            //     printf("Decipher out %d: %c\n", j, decipher_out[j]);
+            //     dbg("Decipher out %d: %c", j, decipher_out[j]);
             // }
 
             strcat(output, cipher_out);
@@ -146,19 +147,19 @@ main_entry(Arguments *arguments)
             char decipher_out[16 + 1];
             decipher_out[16] = '\0';
             decrypt(&aes, chunk, decipher_out);
-            // printf("Decrypted chunk %d: %s\n", i, decipher_out);
+            // dbg("Decrypted chunk %d: %s", i, decipher_out);
             strcat(output, decipher_out);
         }
     }
 
     if (chunk_remnant != 0)
     {
-        printf(".");
+        inf(".");
         char chunk[16 + 1];
 
         memcpy(chunk, input + (chunk_count * sizeof(char) * 16), (sizeof(char) * 16));
         chunk[16] = '\0';
-        // printf("Chunk %d:           %s\n", chunk_count, chunk);
+        // dbg("Chunk %d:           %s", chunk_count, chunk);
 
         if (arguments->encryption_flag == 1)
         {
@@ -167,19 +168,19 @@ main_entry(Arguments *arguments)
             char decipher_out[16 + 1];
             decipher_out[16] = '\0';
             encrypt(&aes, chunk, cipher_out);
-            // printf("Encrypted chunk %d: %s\n", chunk_count, cipher_out);
-            // printf("Strlen encrypted:   %ld\n", strlen(cipher_out));
+            // dbg("Encrypted chunk %d: %s", chunk_count, cipher_out);
+            // dbg("Strlen encrypted:   %ld", strlen(cipher_out));
 
             // for (int j = 0; j < 16; j++) {
-            //     printf("Cipher out %d: %c\n", j, cipher_out[j]);
+            //     dbg("Cipher out %d: %c", j, cipher_out[j]);
             // }
 
             // decrypt(&aes, cipher_out, decipher_out);
-            // printf("Decrypted chunk %d: %s\n", chunk_count, decipher_out);
-            // printf("Strlen decrypted:   %ld\n", strlen(decipher_out));
+            // dbg("Decrypted chunk %d: %s", chunk_count, decipher_out);
+            // dbg("Strlen decrypted:   %ld", strlen(decipher_out));
 
             // for (int j = 0; j < 16; j++) {
-            //     printf("Decipher out %d: %c\n", j, decipher_out[j]);
+            //     dbg("Decipher out %d: %c", j, decipher_out[j]);
             // }
 
             strcat(output, cipher_out);
@@ -189,25 +190,25 @@ main_entry(Arguments *arguments)
             char decipher_out[16 + 1];
             decipher_out[16] = '\0';
             decrypt(&aes, chunk, decipher_out);
-            //printf("Decrypted chunk %d: %s\n", chunk_count, decipher_out);
+            //dbg("Decrypted chunk %d: %s", chunk_count, decipher_out);
             strcat(output, decipher_out);
         }
     }
 
-    printf("\n");
+    inf("\n");
 
     if (arguments->encryption_flag == 1)
     {
-        printf("Saving encrypted file...\n");
+        inf("Saving encrypted file...");
         write_file(output, "encrypted");
     }
     else
     {
-        printf("Saving decrypted file...\n");
+        inf("Saving decrypted file...");
         write_file(output, "decrypted");
     }
 
-    printf("Done.\n");
+    inf("Done.");
 
     free(input);
     free(output);

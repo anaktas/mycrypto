@@ -1,9 +1,9 @@
 debug:
-	gcc -g utils.h utils.c aes.h aes.c main.c -o aes
+	gcc -g config.h log.h log.c utils.h utils.c aes.h aes.c main.c -o aes
 	ulimit -c unlimited
 
 release:
-	gcc utils.h utils.c aes.h aes.c main.c -o aes
+	gcc config.h log.h log.c utils.h utils.c aes.h aes.c main.c -o aes
 
 clean:
 	-rm aes

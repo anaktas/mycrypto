@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "log.h"
 
 /**
  * Reads a file from a file path and assigns it's content to
@@ -23,7 +24,7 @@ read_file(char *file_path,
 
     if (file == NULL)
     {
-        perror("Error while opening the file in read_file()\n");
+        err("Error while opening the file in read_file()");
         return 1;
     }
 
@@ -52,7 +53,7 @@ write_file(char *output, char *file_path)
 
     if (file == NULL)
     {
-        perror("Error while opening the file in write_file()\n");
+        err("Error while opening the file in write_file()");
         return 1;
     }
     
@@ -76,7 +77,7 @@ get_file_size(char *file_path)
 
     if (file == NULL)
     {
-        perror("Error while opening the file in get_file_size()\n");
+        err("Error while opening the file in get_file_size()");
     }
 
     fseek(file, 0, SEEK_END);
@@ -103,8 +104,8 @@ parse_arguments(Arguments *args,
 {
     if (argc < 7)
     {
-        printf("Not enough arguments.\n");
-        printf("Usage: aes [-e|-d] <INPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]\n");
+        err("Not enough arguments.");
+        err("Usage: aes [-e|-d] <INPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]");
         return 1;
     }
 
