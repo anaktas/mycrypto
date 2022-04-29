@@ -26,4 +26,7 @@ parse_arguments(Arguments *args,
                 int argc,
                 char *argv[]);
 
+void
+check(int assert_result, char *explanation);
+
 #endif

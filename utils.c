@@ -1,8 +1,10 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
 #include "log.h"
+#include "config.h"
 
 /**
  * Reads a file from a file path and assigns it's content to
@@ -155,4 +157,21 @@ parse_arguments(Arguments *args,
     }
 
     return 0;    
+}
+
+/**
+ * @brief Performs an assertion of a given
+ * expression. Should be invoked only in
+ * debug mode
+ * 
+ * @param assert_result the result of an assertion expression 
+ * @param explanation a message to display before the assertion
+ */
+void
+check(int assert_result, char *explanation)
+{
+#ifdef ENABLE_DEBUG
+    dbg(explanation);
+    assert(assert_result);
+#endif
 }
