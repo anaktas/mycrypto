@@ -5,6 +5,7 @@ typedef struct
 {
     int encryption_flag;
     char *input_file_path;
+	char *output_file_path;
     char *key_file_path;
     int key_length;
 } Arguments;

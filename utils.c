@@ -105,12 +105,13 @@ parse_arguments(Arguments *args,
     if (argc < 7)
     {
         err("Not enough arguments.");
-        err("Usage: aes [-e|-d] <INPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]");
+        err("Usage: aes [-e|-d] -i <INPUT_FILE_PATH> -o <OUTPUT_FILE_PATH> -k <KEY_FILE_PATH> -l [128|192|256]");
         return 1;
     }
 
     args->encryption_flag = 0;
     args->input_file_path = "";
+	args->output_file_path = "";
     args->key_file_path = "";
     args->key_length = 16;
 
@@ -128,9 +129,17 @@ parse_arguments(Arguments *args,
             {
                 args->encryption_flag = 1;
             }
-            
-            args->input_file_path = argv[i + 1];
         }
+
+		if (!strcmp(argv[i], "-i"))
+		{
+			args->input_file_path = argv[i + 1];
+		}
+		
+		if (!strcmp(argv[i], "-o"))
+		{
+			args->output_file_path = argv[i + 1];
+		}
 
         if (!strcmp(argv[i], "-k"))
         {
