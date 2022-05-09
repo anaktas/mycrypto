@@ -1,13 +1,19 @@
 #ifndef _UTILS_H
 #define _UTILS_H
 
+#include <stdint.h>
+#include <stddef.h>
+
 typedef struct
 {
     int encryption_flag;
+    int key_length;
     char *input_file_path;
 	char *output_file_path;
     char *key_file_path;
-    int key_length;
+    uint8_t key[32];
+    uint8_t iv[16];
+
 } Arguments;
 
 int
@@ -28,5 +34,16 @@ parse_arguments(Arguments *args,
 
 void
 check(int assert_result, char *explanation);
+
+void
+convert_to_hex_string(char *out, 
+                      uint8_t *in, 
+                      size_t out_len, 
+                      size_t in_len);
+
+void
+convert_to_uint8_array(uint8_t *out, 
+                       char *in, 
+                       size_t in_size);
 
 #endif

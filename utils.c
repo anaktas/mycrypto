@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "utils.h"
 #include "log.h"
 #include "config.h"
@@ -174,4 +176,75 @@ check(int assert_result, char *explanation)
     dbg(explanation);
     assert(assert_result);
 #endif
+}
+
+/**
+ * @brief Converts a given byte array into
+ * a hex represenation string of each byte.
+ * 
+ * @param out     the output string
+ * @param in      the input byte array
+ * @param out_len the output string length
+ * @param in_len  the input array size
+ */
+void
+convert_to_hex_string(char *out, 
+                      uint8_t *in, 
+                      size_t out_len, 
+                      size_t in_len)
+{
+    static const char hex_table[] = "0123456789abcdef";
+
+    if (out_len < ((in_len * 2) +1))
+    {
+        err("Error while converting to hex string");
+        return;
+    }
+
+    while (in_len--)
+    {
+        /* shift down the top nibble and pick a char from the hex_table */
+        *out++ = hex_table[*in >> 4];
+        /* extract the bottom nibble and pick a char from the hex_table */
+        *out++ = hex_table[*in++ & 0xF];
+    }
+
+    *out = 0;
+}
+
+/**
+ * @brief Converts a given hex representation string
+ * into a byte array.
+ * 
+ * @param out     the output byte array
+ * @param in      the input hex string
+ * @param in_size the string length
+ */
+void
+convert_to_uint8_array(uint8_t *out, 
+                       char *in, 
+                       size_t in_size) 
+{
+    char buffer[3];
+    size_t i;
+    int value;
+
+    for (i = 0; i < in_size && *in; i++) 
+    {
+        buffer[0] = *in++;
+        buffer[1] = '\0';
+
+        if (*in) 
+        {
+            buffer[1] = *in++;
+            buffer[2] = '\0';
+        }
+        
+        if (sscanf(buffer, "%x", &value) != 1) 
+        {
+            break;
+        }
+
+        out[i] = value;
+    }
 }
