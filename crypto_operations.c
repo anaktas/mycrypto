@@ -4,6 +4,8 @@
 #include "aes.h"
 #include "log.h"
 
+#define BUFFER_SIZE 16
+
 /**
  * @brief
  * 
@@ -17,6 +19,8 @@
 int
 crypto_update_file(Arguments *args, bool is_encrypt)
 {
+	int exit_status = 0;
+
 	if (is_encrypt)
 	{
 		inf("Encrypting file: %s", args->input_file_path);
@@ -27,10 +31,10 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 	}
 
 	check(args->input_file_path != NULL, "Check input file path");
-	check(args->output_file_path != NULL, "Chekc output file path");
+	check(args->output_file_path != NULL, "Check output file path");
 
 	int number_of_bytes;
-	uint8_t input_buffer[16], output_buffer[16];
+	uint8_t input_buffer[BUFFER_SIZE], output_buffer[BUFFER_SIZE];
 
 	FILE *input_file = NULL;
 	FILE *output_file = NULL;
@@ -43,13 +47,15 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 	if (!input_file)
 	{
 		err("Unable to open: %s in reading mode.", args->input_file_path);
-		goto error;
+		exit_status = 1;
+		goto exit;
 	}
 
 	if (!output_file)
 	{
 		err("Unabe to open: %s in writing mode.", args->output_file_path);
-		goto error;
+		exit_status = 1;
+		goto exit;
 	}
 
 	Aes_Error aes_error = init(&aes, args->key, args->key_length);
@@ -57,7 +63,8 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 	if (aes_error != NO_ERROR)
 	{
 		err("Unable to initialize the AES key. Code: %d", aes_error);
-		goto error;
+		exit_status = 1;
+		goto exit;
 	}
 
 	printf("\n");
@@ -68,13 +75,15 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 		number_of_bytes = fread(input_buffer,
 								sizeof(uint8_t),
-								16,
+								sizeof(input_buffer),
 								input_file);
 
 		if (ferror(input_file))
 		{
+			printf("\n");
 			err("Failed to read from input file.");
-			goto error;
+			exit_status = 1;
+			goto exit;
 		}
 
 		if (is_encrypt)
@@ -93,20 +102,21 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 		if (ferror(output_file))
 		{
+			printf("\n");
 			err("Unable to write in output file.");
-			goto error;
+			exit_status = 1;
+			goto exit;
 		}
 
-		if (number_of_bytes < 16) break;
+		if (number_of_bytes < BUFFER_SIZE) break;
 	}
 
 	printf("\n");
 
-	return 0;
+	inf("The %scryption of the file has been completed.", (is_encrypt ? "en" : "de"));
 
-error:
-	printf("\n");
+exit:
 	if (input_file) fclose(input_file);
 	if (output_file) fclose(output_file);
-	return 1;
+	return exit_status;
 }
