@@ -66,21 +66,22 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 		exit_status = 1;
 		goto exit;
 	}
-
-	printf("\n");
+	
+	int count = 0;
 
 	while (1)
 	{
-		printf(".");
-
 		number_of_bytes = fread(input_buffer,
 								sizeof(uint8_t),
 								sizeof(input_buffer),
 								input_file);
 
+		dbg("Loop index %d, n. of bytes %d", count, number_of_bytes);
+
+		count++;
+
 		if (ferror(input_file))
 		{
-			printf("\n");
 			err("Failed to read from input file.");
 			exit_status = 1;
 			goto exit;
@@ -97,12 +98,11 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 		fwrite(output_buffer,
 			   sizeof(uint8_t),
-			   sizeof(output_buffer),
+			   number_of_bytes,
 			   output_file);
 
 		if (ferror(output_file))
 		{
-			printf("\n");
 			err("Unable to write in output file.");
 			exit_status = 1;
 			goto exit;
@@ -110,8 +110,6 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 		if (number_of_bytes < BUFFER_SIZE) break;
 	}
-
-	printf("\n");
 
 	inf("The %scryption of the file has been completed.", (is_encrypt ? "en" : "de"));
 
