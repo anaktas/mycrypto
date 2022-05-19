@@ -11,6 +11,7 @@ typedef struct
     char *input_file_path;
 	char *output_file_path;
     char *key_file_path;
+	char password[80];
     uint8_t key[32];
     uint8_t iv[16];
 
