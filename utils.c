@@ -9,6 +9,74 @@
 #include "config.h"
 
 /**
+ * @brief Constant magic key seed array with random selected bytes
+ */
+static const uint8_t key_seed[32] =
+{
+	0x88, 0x46, 0xEE, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x5B, 0x6A, 0xCB, 0xD7, 0xAB, 0x76,
+	0x04, 0xC7, 0x23, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0
+};
+
+/**
+ * @brief Debugging function. Prints out the key seed and the
+ * hashed password.
+ * 
+ * @param key the given byte key to print
+ */
+void
+print_hex_key(uint8_t *key)
+{
+#ifdef ENABLE_DEBUG
+    printf("\n");
+
+    printf("Key seed (hex): ");
+    for (int i = 0; i < 32; i++)
+    {
+        printf("%02hhx ", key_seed[i]);
+    }
+
+    printf("\n");
+
+    printf("Key (hex):      ");
+    for (int i = 0; i < 32; i++)
+    {
+        printf("%02hhx ", key[i]);
+    }
+
+    printf("\n");
+#endif
+}
+
+/**
+ * @brief Converts a string password into a 
+ * usable encryption key.
+ * 
+ * @param key      the output byte key
+ * @param password the given passowrd
+ * @param len      the length of the password
+ */
+void
+hash_password(uint8_t *key,
+              char *password,
+              int len)
+{
+    int offset = 0;
+
+    for (int i = 0; i < 32; i++)
+    {
+        int pass_index = i - offset;
+
+        if (pass_index >= len)
+        {
+            pass_index = 0;
+            offset = i;
+        }
+
+        key[i] = key_seed[i] ^ ((uint8_t) password[pass_index]);
+    }
+}
+
+/**
  * Reads a file from a file path and assigns it's content to
  * an output pointer. The buffer size has to be given as an
  * input as well

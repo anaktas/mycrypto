@@ -17,6 +17,14 @@ typedef struct
 
 } Arguments;
 
+void
+print_hex_key(uint8_t *key);
+
+void
+hash_password(uint8_t *key,
+              char *password,
+              int len);
+
 int
 read_file(char *file_path,
           char *output,
