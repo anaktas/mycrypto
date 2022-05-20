@@ -49,7 +49,7 @@ main(int argc, char *argv[])
 void
 main_entry(Arguments *arguments)
 {
-	int status = crypto_update_file(arguments, (arguments->encryption_flag == 1));
+	int status = crypto_update_file(arguments);
 
     exit(status);
 }

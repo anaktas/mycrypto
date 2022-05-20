@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include "utils.h"
 #include "aes.h"
@@ -71,19 +70,18 @@ exit:
  * 
  * File encryption/decryption routine wrapper.
  * 
- * @param args       given command line arguments
- * @param is_encrypt encryption flag
+ * @param args the given command line arguments
  * 
- * @return int 
+ * @return int 0 SUCESS, 1 FAILURE
  */
 int
-crypto_update_file(Arguments *args, bool is_encrypt)
+crypto_update_file(Arguments *args)
 {
 	dbg("crypto_update_file()");
 
 	int exit_status = 0;
 
-	if (is_encrypt)
+	if (args->encryption_flag)
 	{
 		inf("Encrypting file: %s", args->input_file_path);
 	}
@@ -103,7 +101,7 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 	Aes aes;
 
-	if (is_encrypt)
+	if (args->encryption_flag)
 	{
 		if (create_temp_file_with_padding(args->input_file_path))
 		{
@@ -164,7 +162,7 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 			goto exit;
 		}
 
-		if (is_encrypt)
+		if (args->encryption_flag)
 		{
 			encrypt(&aes, input_buffer, output_buffer);
 		}
@@ -188,9 +186,9 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 		if (number_of_bytes < BUFFER_SIZE) break;
 	}
 
-	inf("The %scryption of the file has been completed.", (is_encrypt ? "en" : "de"));
+	inf("The %scryption of the file has been completed.", (args->encryption_flag ? "en" : "de"));
 
-	if (!is_encrypt)
+	if (!args->encryption_flag)
 	{
 		if (output_file)
 		{
