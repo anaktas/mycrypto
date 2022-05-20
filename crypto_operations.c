@@ -7,6 +7,110 @@
 #define BUFFER_SIZE 16
 
 /**
+ * @brief Creates a temporary file which has the same
+ * contents as the original file + 16 bytes of padding
+ * at the end of the file.
+ * 
+ * @param original_file_path the given file path of the
+ * 							 original file
+ * 
+ * @return int 0 SUCCESS, 1 FAILURE
+ */
+static int
+create_temp_file_with_padding(char *original_file_path)
+{
+	int exit_status = 0;
+
+	uint8_t padding[16] = {0};
+	uint8_t buffer[BUFFER_SIZE];
+
+	FILE *original_file = NULL;
+	FILE *intermediate_temp_file = NULL;
+	FILE *temp_file = NULL;
+
+	original_file = fopen(original_file_path, "rb");
+
+	if (!original_file)
+	{
+		err("Unable to open the input file.");
+		exit_status = 1;
+		goto exit;
+	}
+
+	intermediate_temp_file = fopen("file.temp", "wb");
+
+	if (!intermediate_temp_file)
+	{
+		err("Unable to open the intermediate temp file.");
+		exit_status = 1;
+		goto exit;
+	}
+
+	int number_of_bytes = 0;
+
+	while (1)
+	{
+		number_of_bytes = fread(buffer,
+								sizeof(uint8_t),
+								sizeof(buffer),
+								original_file);
+
+		if (ferror(original_file))
+		{
+			err("Failed to read from input file.");
+			exit_status = 1;
+			goto exit;
+		}
+
+		fwrite(buffer,
+			   sizeof(uint8_t),
+			   number_of_bytes,
+			   intermediate_temp_file);
+
+		if (ferror(intermediate_temp_file))
+		{
+			err("Unable to write in output file.");
+			exit_status = 1;
+			goto exit;
+		}
+
+		if (number_of_bytes < BUFFER_SIZE) break;
+	}
+
+	if (intermediate_temp_file)
+	{
+		fclose(intermediate_temp_file);
+		intermediate_temp_file = NULL;
+	}
+
+	temp_file = fopen("file.temp", "a");
+
+	if (!temp_file) 
+	{
+		err("Unable to open temp file for appedning padding.");
+		exit_status = 1;
+		goto exit;
+	}
+
+	fwrite(padding,
+		   sizeof(padding),
+		   BUFFER_SIZE,
+		   temp_file);
+
+	if (ferror(temp_file))
+	{
+		err("Unable to write in temp file.");
+		exit_status = 1;
+	}
+	
+exit:
+	if (original_file) fclose(original_file);
+	if (intermediate_temp_file) fclose(intermediate_temp_file);
+	if (temp_file) fclose(temp_file);
+	return exit_status;
+}
+
+/**
  * @brief
  * 
  * File encryption/decryption routine wrapper.
