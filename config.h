@@ -2,6 +2,6 @@
 #define _CONFIG_H
 
 #define ENABLE_DEBUG 1
-#define VERSION "0.1.0"
+#define VERSION "1.0.0"
 
 #endif
