@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "utils.h"
 #include "aes.h"
 #include "log.h"
@@ -19,71 +21,27 @@
 static int
 create_temp_file_with_padding(char *original_file_path)
 {
+	dbg("create_temp_file_with_padding(%s)", original_file_path);
+
 	int exit_status = 0;
 
 	uint8_t padding[16] = {0};
-	uint8_t buffer[BUFFER_SIZE];
 
-	FILE *original_file = NULL;
-	FILE *intermediate_temp_file = NULL;
+	char copy_cmd[512];
+
+	sprintf(
+		copy_cmd,
+		"cp %s file.temp",
+		original_file_path
+	);
+
+	dbg("Executing: %s", copy_cmd);
+	int execution_status = system(copy_cmd);
+	dbg("Execution status: %d", execution_status);
+
 	FILE *temp_file = NULL;
 
-	original_file = fopen(original_file_path, "rb");
-
-	if (!original_file)
-	{
-		err("Unable to open the input file.");
-		exit_status = 1;
-		goto exit;
-	}
-
-	intermediate_temp_file = fopen("file.temp", "wb");
-
-	if (!intermediate_temp_file)
-	{
-		err("Unable to open the intermediate temp file.");
-		exit_status = 1;
-		goto exit;
-	}
-
-	int number_of_bytes = 0;
-
-	while (1)
-	{
-		number_of_bytes = fread(buffer,
-								sizeof(uint8_t),
-								sizeof(buffer),
-								original_file);
-
-		if (ferror(original_file))
-		{
-			err("Failed to read from input file.");
-			exit_status = 1;
-			goto exit;
-		}
-
-		fwrite(buffer,
-			   sizeof(uint8_t),
-			   number_of_bytes,
-			   intermediate_temp_file);
-
-		if (ferror(intermediate_temp_file))
-		{
-			err("Unable to write in output file.");
-			exit_status = 1;
-			goto exit;
-		}
-
-		if (number_of_bytes < BUFFER_SIZE) break;
-	}
-
-	if (intermediate_temp_file)
-	{
-		fclose(intermediate_temp_file);
-		intermediate_temp_file = NULL;
-	}
-
-	temp_file = fopen("file.temp", "a");
+	temp_file = fopen("file.temp", "ab");
 
 	if (!temp_file) 
 	{
@@ -94,7 +52,7 @@ create_temp_file_with_padding(char *original_file_path)
 
 	fwrite(padding,
 		   sizeof(padding),
-		   BUFFER_SIZE,
+		   1,
 		   temp_file);
 
 	if (ferror(temp_file))
@@ -104,8 +62,6 @@ create_temp_file_with_padding(char *original_file_path)
 	}
 	
 exit:
-	if (original_file) fclose(original_file);
-	if (intermediate_temp_file) fclose(intermediate_temp_file);
 	if (temp_file) fclose(temp_file);
 	return exit_status;
 }
@@ -123,6 +79,8 @@ exit:
 int
 crypto_update_file(Arguments *args, bool is_encrypt)
 {
+	dbg("crypto_update_file()");
+
 	int exit_status = 0;
 
 	if (is_encrypt)
@@ -145,8 +103,23 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 	Aes aes;
 
-	input_file = fopen(args->input_file_path, "rb");
-	output_file = fopen(args->output_file_path, "wb");
+	if (is_encrypt)
+	{
+		if (create_temp_file_with_padding(args->input_file_path))
+		{
+			err("Unable to create temp file with padding.");
+			exit_status = 1;
+			goto exit;
+		}
+
+		input_file = fopen("file.temp", "rb");
+		output_file = fopen(args->output_file_path, "wb");
+	}
+	else
+	{
+		input_file = fopen(args->input_file_path, "rb");
+		output_file = fopen("file.temp", "wb");
+	}
 
 	if (!input_file)
 	{
@@ -217,7 +190,30 @@ crypto_update_file(Arguments *args, bool is_encrypt)
 
 	inf("The %scryption of the file has been completed.", (is_encrypt ? "en" : "de"));
 
+	if (!is_encrypt)
+	{
+		if (output_file)
+		{
+			fclose(output_file);
+			output_file = NULL;
+		}
+
+		char head_cmd[512];
+
+		sprintf(
+			head_cmd,
+			"head -c -16 file.temp > %s",
+			args->output_file_path
+		);
+
+		/* @Refactor: We need a better way to do this */
+		dbg("Executing: %s", head_cmd);
+		int execution_status = system(head_cmd);
+		dbg("Execution status: %d", execution_status);
+	}
+
 exit:
+	if (remove("file.temp")) warn("Unable to remove file.temp");
 	if (input_file) fclose(input_file);
 	if (output_file) fclose(output_file);
 	return exit_status;
